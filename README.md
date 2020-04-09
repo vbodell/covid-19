@@ -9,7 +9,7 @@ The following packages are used to facilitate playing
 - [Pandas](https://pandas.pydata.org): To process data
 - [Matplotlib](https://matplotlib.org): To plot graphs
 - [Seaborn](https://seaborn.pydata.org): To plot high-level graphs
-- [Jupyter notebook](https://jupyter.org): To 
+- [Jupyter notebook](https://jupyter.org): To minimize debugging...
 
 To install these using [pip](https://pip.pypa.io/en/stable/) run
 `pip install -r requirements.txt`
@@ -26,5 +26,6 @@ there is new data available and launch Jupyter notebook.
 
 ## Future work
 
-- Track daily changes (interesting for total
+- Track daily changes by keeping previous data; 
+could be interesting to track changes in agegroups.
 - Come up with more fun graphs
