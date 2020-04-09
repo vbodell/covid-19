@@ -20,10 +20,9 @@ If you're using [conda](https://docs.conda.io/en/latest/) run
 ## How to run
 
 1. Clone this repo
-1. Run `./run_playground.sh`
-1. The command will update the data source if there is new data available and
-Jupyter notebook will launch, start a new notebook or 
-keep editing `covid-playground.ipynb`
+1. Run `./run_playground.sh`. The command will update the data source if 
+there is new data available and launch Jupyter notebook. 
+1. Edit `covid-playground.ipynb` to your liking.
 
 ## Future work
 
