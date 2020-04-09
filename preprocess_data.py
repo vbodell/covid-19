@@ -1,19 +1,26 @@
 #!/usr/bin/env python
+from re import sub
+
 import pandas as pd
 
 # Column name mappings
-total_rename_dict = {'Kön': 'sex',
+day_rename_dict = {'Statistikdatum': 'date',
+                   'Datum_vårdstart': 'date',
+                   'Datum_avliden': 'date',
+                   'Totalt_antal_fall': 'total_cases',
+                   'Totalt_antal_avlidna': 'total_deceased',
+                   'Antal_avlidna': 'total_deceased',
+                   'Totalt_antal_intensivvårdade': 'total_icu',
+                   'Antal_intensivvårdade': 'total_icu',
+                  }
+total_rename_dict = {'Region': 'region',
+                     'Kön': 'sex',
                      'Åldersgrupp': 'agegroup',
                      'Totalt_antal_fall': 'total_cases',
                      'Fall_per_100000_inv': 'cases_per_100k',
                      'Totalt_antal_avlidna': 'total_deceased',
                      'Totalt_antal_intensivvårdade': 'total_icu',
                     }
-day_rename_dict = {'Statistikdatum': 'date',
-                   'Totalt_antal_fall': 'total_cases',
-                   'Totalt_antal_avlidna': 'total_deceased',
-                   'Totalt_antal_intensivvårdade': 'total_icu',
-                  }
 
 def _main():
     # Get data
@@ -26,45 +33,33 @@ def _main():
     sex_total = dfdict[4]
     age_total = dfdict[5]
 
+    # Rename columns
+    ic_all_day.rename(columns=day_rename_dict, inplace=True)
+    region_day.rename(columns=day_rename_dict, inplace=True)
+    deaths_all_day.rename(columns=day_rename_dict, inplace=True)
+
+    region_total.rename(columns=total_rename_dict, inplace=True)
+    sex_total.rename(columns=total_rename_dict, inplace=True)
+    age_total.rename(columns=total_rename_dict, inplace=True)
+
     # All total-data in one DataFrame
     total_df = pd.concat([region_total, sex_total, age_total])
     # Reorder columns
-    total_df = total_df[['Region', 'Kön', 'Åldersgrupp',
-                         'Totalt_antal_fall', 'Fall_per_100000_inv',
-                         'Totalt_antal_intensivvårdade', 'Totalt_antal_avlidna']]
+    total_df = total_df[['region', 'sex', 'agegroup',
+        'total_cases', 'cases_per_100k', 'total_icu', 'total_deceased']]
 
     # Process date-data
-    region_day.Statistikdatum = pd.to_datetime(region_day.Statistikdatum)
-
-    deaths_all_day.rename(columns={'Datum_avliden': 'Statistikdatum',
-                                   'Antal_avlidna': 'Totalt_antal_avlidna'},
-                          inplace=True)
-    if sum(deaths_all_day.Statistikdatum == 'Uppgift saknas') > 0:
-        deaths_all_day.loc[
-            deaths_all_day.Statistikdatum == 'Uppgift saknas', 'Statistikdatum'
-        ] = pd.NA
-    deaths_all_day.Statistikdatum = pd.to_datetime(deaths_all_day.Statistikdatum)
-
-    ic_all_day.rename(columns={'Datum_vårdstart': 'Statistikdatum',
-                               'Antal_intensivvårdade': 'Totalt_antal_intensivvårdade'},
-                      inplace=True)
-    if sum(ic_all_day.Statistikdatum == 'Uppgift saknas') > 0:
-        ic_all_day.loc[
-            ic_all_day.Statistikdatum == 'Uppgift saknas', 'Statistikdatum'
-        ] = pd.NA
-    ic_all_day.Statistikdatum = pd.to_datetime(ic_all_day.Statistikdatum)
+    region_day.date = pd.to_datetime(region_day.date, errors='coerce')
+    deaths_all_day.date = pd.to_datetime(deaths_all_day.date, errors='coerce')
+    ic_all_day.date = pd.to_datetime(ic_all_day.date, errors='coerce')
 
     # Merge datasets
-    day_df = pd.merge(region_day, deaths_all_day, how='outer', on='Statistikdatum')
-    day_df = pd.merge(day_df, ic_all_day, how='outer', on='Statistikdatum')
+    day_df = pd.merge(region_day, deaths_all_day, how='outer', on='date')
+    day_df = pd.merge(day_df, ic_all_day, how='outer', on='date')
 
     # Rename 'Uppgift saknas'
-    total_df.loc[total_df['Kön'] == 'Uppgift saknas','Kön'] = 'unknown'
-    total_df.loc[total_df['Åldersgrupp'] == 'Uppgift saknas','Åldersgrupp'] = 'unknown'
-
-    # Rename columns
-    total_df.rename(columns=total_rename_dict, inplace=True)
-    day_df.rename(columns=day_rename_dict, inplace=True)
+    total_df.loc[total_df['sex'] == 'Uppgift saknas','sex'] = 'unknown'
+    total_df.loc[total_df['agegroup'] == 'Uppgift saknas','agegroup'] = 'unknown'
 
     # Save data
     total_df.to_pickle('total.pkl')
