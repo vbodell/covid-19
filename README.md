@@ -29,3 +29,5 @@ there is new data available and launch Jupyter notebook.
 - Track daily changes by keeping previous data; 
 could be interesting to track changes in agegroups.
 - Come up with more fun graphs
+- Come up with more external data sources to link to
+- Potential machine learning application?
