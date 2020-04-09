@@ -29,15 +29,15 @@ def _main():
     # All total-data in one DataFrame
     total_df = pd.concat([region_total, sex_total, age_total])
     # Reorder columns
-    total_df = total_df[['Region', 'Kön', 'Åldersgrupp', 
-                         'Totalt_antal_fall', 'Fall_per_100000_inv', 
+    total_df = total_df[['Region', 'Kön', 'Åldersgrupp',
+                         'Totalt_antal_fall', 'Fall_per_100000_inv',
                          'Totalt_antal_intensivvårdade', 'Totalt_antal_avlidna']]
 
     # Process date-data
     region_day.Statistikdatum = pd.to_datetime(region_day.Statistikdatum)
 
-    deaths_all_day.rename(columns={'Datum_avliden': 'Statistikdatum', 
-                                   'Antal_avlidna': 'Totalt_antal_avlidna'}, 
+    deaths_all_day.rename(columns={'Datum_avliden': 'Statistikdatum',
+                                   'Antal_avlidna': 'Totalt_antal_avlidna'},
                           inplace=True)
     if sum(deaths_all_day.Statistikdatum == 'Uppgift saknas') > 0:
         deaths_all_day.loc[
@@ -45,25 +45,25 @@ def _main():
         ] = pd.NA
     deaths_all_day.Statistikdatum = pd.to_datetime(deaths_all_day.Statistikdatum)
 
-    ic_all_day.rename(columns={'Datum_vårdstart': 'Statistikdatum', 
-                               'Antal_intensivvårdade': 'Totalt_antal_intensivvårdade'}, 
+    ic_all_day.rename(columns={'Datum_vårdstart': 'Statistikdatum',
+                               'Antal_intensivvårdade': 'Totalt_antal_intensivvårdade'},
                       inplace=True)
     if sum(ic_all_day.Statistikdatum == 'Uppgift saknas') > 0:
         ic_all_day.loc[
             ic_all_day.Statistikdatum == 'Uppgift saknas', 'Statistikdatum'
         ] = pd.NA
     ic_all_day.Statistikdatum = pd.to_datetime(ic_all_day.Statistikdatum)
-    
+
     # Merge datasets
     day_df = pd.merge(region_day, deaths_all_day, how='outer', on='Statistikdatum')
     day_df = pd.merge(day_df, ic_all_day, how='outer', on='Statistikdatum')
-    
+
     # Rename 'Uppgift saknas'
     total_df.loc[total_df['Kön'] == 'Uppgift saknas','Kön'] = 'unknown'
     total_df.loc[total_df['Åldersgrupp'] == 'Uppgift saknas','Åldersgrupp'] = 'unknown'
-    
+
     # Rename columns
-    total_df.rename(columns=day_rename_dict, inplace=True)
+    total_df.rename(columns=total_rename_dict, inplace=True)
     day_df.rename(columns=day_rename_dict, inplace=True)
 
     # Save data
