@@ -61,6 +61,11 @@ def _main():
     total_df.loc[total_df['sex'] == 'Uppgift saknas','sex'] = 'unknown'
     total_df.loc[total_df['agegroup'] == 'Uppgift saknas','agegroup'] = 'unknown'
 
+    total_df.loc[total_df.agegroup.notna(),'agegroup'] = \
+        [sub(r'Ålder_([0-9]+)_([0-9]+)', r'\1-\2', x) for x
+                in total_df.loc[total_df.agegroup.notna(),'agegroup']]
+    total_df.loc[total_df['agegroup'] == 'Ålder_90_plus', 'agegroup'] = '90+'
+
     # Save data
     total_df.to_pickle('total.pkl')
     day_df.to_pickle('day.pkl')
